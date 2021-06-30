@@ -76,14 +76,13 @@ namespace AtomicSeller.Controllers
             bool deliveryStatus = false;
             string trackingNumber = "1Z2356F1ZJ98L9733M5";
             string carrier_name = "UPS";
-            string carrier_code = "UPS";
+            string carrier_code = "";
             string trackingurl = "https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={trackingId}";
 
-            string orderID = "DGLDE000002751601-A";
-            string offersku = "S2426";
+            string orderID = "DGLDE000003220301-A";
 
             //// Beware !!! This is production site with real data
-            ResponseHeader _ResponseHeader = new MiraklDouglas().PutTrackingNumber(_Store, orderID, offersku, deliveryStatus, trackingNumber, carrier_name, carrier_code, trackingurl);
+            ResponseHeader _ResponseHeader = new MiraklDouglas().PutTrackingNumber(_Store, orderID, deliveryStatus, trackingNumber, carrier_name, carrier_code, trackingurl);
 
             return RedirectToAction("Index", "Home");
         }

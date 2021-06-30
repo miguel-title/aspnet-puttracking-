@@ -14,17 +14,17 @@ namespace AtomicSeller
     public class MiraklDouglas
     {
 
-        private string SendPostHttpRequest(Models.MiraklStore _Store, String jsonParam)
+        private string SendPutHttpRequest(Models.MiraklStore _Store, String jsonParam, string strOrderID)
         {
             const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
             const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
             ServicePointManager.SecurityProtocol = Tls12;
 
-            string url = _Store.APIURL + "/api/shipments";
+            string url = _Store.APIURL + "/api/orders/" + strOrderID + "/tracking";
 
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
             httpWebRequest.ContentType = "application/json";
-            httpWebRequest.Method = "POST";
+            httpWebRequest.Method = "PUT";
             httpWebRequest.Accept = "application/json";
             httpWebRequest.Headers.Add("Authorization", _Store.APIKey);
 
@@ -42,7 +42,7 @@ namespace AtomicSeller
             return result;
         }
 
-        public ResponseHeader PutTrackingNumber(Models.MiraklStore _Store, string orderID, string offersku, bool deliveryStatus, string trackingNumber, string carrier_name, string carrier_code, string trackingurl)
+        public ResponseHeader PutTrackingNumber(Models.MiraklStore _Store, string orderID, bool deliveryStatus, string trackingNumber, string carrier_name, string carrier_code, string trackingurl)
         {
             ResponseHeader _ResponseHeader = new ResponseHeader();
             _ResponseHeader.LanguageCode = "En";
@@ -50,34 +50,20 @@ namespace AtomicSeller
             _ResponseHeader.ReturnCode = "AS0000";
             _ResponseHeader.ReturnMessage = "";
 
-            PostDeliveryRequest validateOrderRequest = new PostDeliveryRequest();
-            shipments _shipments = new shipments();
-            _shipments.order_id = orderID;
-            _shipments.shipped = deliveryStatus;
-            tracking _tracking = new tracking();
+            PutTrackingRequest _tracking = new PutTrackingRequest();
             _tracking.carrier_code = carrier_code;
             _tracking.carrier_name = carrier_name;
             _tracking.tracking_number = trackingNumber;
             _tracking.tracking_url = trackingurl;
-            _shipments.tracking = _tracking;
-            shipment_lines _shipment_lines = new shipment_lines();
-            _shipment_lines.offer_sku = offersku;
-            _shipment_lines.order_line_id = "";
-            _shipment_lines.quantity = 1;
-            _shipments.shipment_lines = new List<shipment_lines>();
-            _shipments.shipment_lines.Add(_shipment_lines);
 
-            validateOrderRequest.shipments = new List<shipments>();
-            validateOrderRequest.shipments.Add(_shipments);
 
             string jsonParam = string.Empty;
-            jsonParam = JsonConvert.SerializeObject(validateOrderRequest).ToString();
+            jsonParam = JsonConvert.SerializeObject(_tracking).ToString();
 
             string strOrderResult = string.Empty;
             try
             {
-                strOrderResult = new MiraklDouglas().SendPostHttpRequest(_Store, jsonParam);
-                List<PostTrackingNumberResponseData> orderResult = JsonConvert.DeserializeObject<List<PostTrackingNumberResponseData>>(strOrderResult);
+                new MiraklDouglas().SendPutHttpRequest(_Store, jsonParam, orderID);
             }
             catch (Exception ex)
             {
