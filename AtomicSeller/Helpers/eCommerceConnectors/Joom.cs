@@ -28,7 +28,7 @@ namespace AtomicSeller
         private JObject details;
         //private string m_AccessToken;
 
-        private string GetAccessToken(Store _Store)
+        private string GetAccessToken(JoomStore _Store)
         {
             //const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
             //const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
@@ -39,8 +39,8 @@ namespace AtomicSeller
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
             ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
 
-            string Email = _Store.UserName; // a608f494@gorilla.club
-            string APIURL = _Store.StoreAPIURL; // https://sandbox-202011-api-merchant.joomdev.net
+            string Email = _Store.User; // a608f494@gorilla.club
+            string APIURL = _Store.APIURL; // https://sandbox-202011-api-merchant.joomdev.net
 
             // https://api-merchant.joom.com/api/v3.
             // Base URL for sandbox is https://sandbox-merchant-api.dev.joom.it/api/v3.
@@ -67,100 +67,18 @@ namespace AtomicSeller
             }
             catch(Exception ex)
             {
-                Tools.ErrorHandler("Joom GetAccessToken error", ex);
             }
             return (m_AccessToken);
         }
 
-        public ResponseHeader Joom_PutDeliveryInfo(Models.Store _Store, string OrderKey = null,
-    string OrderID = null, string OrderID_Ext = null, string DeliveryStatus = null, string ShippingID = null, string TrackingNumber = null,
-    string TrackingProviderKey = null, string TrackingProviderName = null,
-    string TrackingURL = null)
-        {
-            ResponseHeader _DeliveryResponseHeader = new ResponseHeader();
-
-            if (string.IsNullOrEmpty(TrackingNumber) && string.IsNullOrEmpty(OrderID_Ext) && string.IsNullOrEmpty(DeliveryStatus))
-            {
-                _DeliveryResponseHeader.LanguageCode = "En";
-                _DeliveryResponseHeader.RequestStatus = "Error";
-                _DeliveryResponseHeader.ReturnCode = "ASxxxx";
-                _DeliveryResponseHeader.StatusCode = "404";
-                _DeliveryResponseHeader.ReasonPhrase = AtomicAPI.Helpers.Constants.GetReasonPhrase("404");
-                _DeliveryResponseHeader.ReturnMessage = "Either TrackingNumber and OrderID_Ext and DeliveryStatus empty!";
-                return _DeliveryResponseHeader;
-            }
-            else
-            {
-                string ACCESS_TOKEN = GetAccessToken(_Store);
-
-
-                string FulfillmentURL = _Store.StoreAPIURL + "/api/v3/orders/fulfill";
-
-                string FULLUpdateURL = FulfillmentURL + "?id=" + OrderKey;
-
-                //_OrderVM.Order.OrderKey = _JOrder.id;
-
-                var client = new RestClient(FulfillmentURL);
-
-                FulFillRootobject _FulFillBody = new JoomAPI.Models.FulFillRootobject();
-                _FulFillBody.provider = TrackingProviderName;
-                _FulFillBody.providerId = TrackingProviderKey;
-                _FulFillBody.trackingNumber = TrackingNumber;
-
-                string jsonParam = string.Empty;
-                jsonParam = JsonConvert.SerializeObject(_FulFillBody).ToString();
-
-                client.Timeout = -1;
-                var request = new RestRequest(Method.POST);
-                request.AddHeader("Authorization", ACCESS_TOKEN);
-                request.AddParameter("application/json", jsonParam, ParameterType.RequestBody);
-
-                new DA_MT().InsertAuditTrail("Joom", "Joom_PutProductsInfo call", jsonParam, "");
-
-                try
-                {
-                    IRestResponse response = client.Execute(request);
-
-                    string PostProductInfo_JSON = JObject.Parse(response.Content).ToString();
-
-                    new DA_MT().InsertAuditTrail("Joom", "Joom_PutProductsInfo call", jsonParam, "");
-
-                    _DeliveryResponseHeader.LanguageCode = "En";
-                    _DeliveryResponseHeader.RequestStatus = "Ok";
-                    _DeliveryResponseHeader.ReturnCode = "AS0000";
-                    _DeliveryResponseHeader.StatusCode = "200";
-                    _DeliveryResponseHeader.ReasonPhrase = AtomicAPI.Helpers.Constants.GetReasonPhrase("200");
-                    _DeliveryResponseHeader.ReturnMessage = PostProductInfo_JSON;
-
-                }
-                catch (Exception ex)
-                {
-                    _DeliveryResponseHeader.LanguageCode = "En";
-                    _DeliveryResponseHeader.RequestStatus = "Error";
-                    _DeliveryResponseHeader.ReturnCode = "ASxxxx";
-                    _DeliveryResponseHeader.StatusCode = "400";
-                    _DeliveryResponseHeader.ReasonPhrase = AtomicAPI.Helpers.Constants.GetReasonPhrase("400");
-                    _DeliveryResponseHeader.ReturnMessage = ex.Message;
-
-                    string Title = "Jomm PutDeliveryInfo severe error " + DateTime.Now.ToString();
-                    string _ValidationErrorMessage = ex.Message;
-                    string _InnerException = new Tools().GetInnerException(ex);
-
-                    new Email().ReportErrorByEmail(Title, _ValidationErrorMessage, _InnerException, ex.StackTrace);
-
-                }
-            }
-            return _DeliveryResponseHeader;
-        }
-
-        public List<string> Joom_ListCarriers(Models.Store _Store)
+        public List<string> Joom_ListCarriers(Models.JoomStore _Store)
         {
 
             List<string> ReturnCarrierList = new List<string>();
 
             string API_BASE_URL = "";
 
-            API_BASE_URL = _Store.StoreAPIURL;
+            API_BASE_URL = _Store.APIURL;
 
             string strCarriersResult = string.Empty;
             string GetListAllCarriers_API_URL = API_BASE_URL + "/api/v3/shippers";
@@ -193,6 +111,44 @@ namespace AtomicSeller
             return ReturnCarrierList;
         }
 
+        public ResponseHeader PutTrackingNumber(Models.JoomStore _Store, string strProviderID, string strTrackingNumber, string orderID)
+        {
+            ResponseHeader _header = new ResponseHeader();
 
+
+            string ACCESS_TOKEN = GetAccessToken(_Store);
+            
+            string API_BASE_URL = "";
+            API_BASE_URL = _Store.APIURL;
+            string PutTracking_API_URL = API_BASE_URL + "/api/v3/orders/modifyTracking?id=" + orderID;
+
+            var client = new RestClient(PutTracking_API_URL);
+            client.Timeout = -1;
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Authorization", ACCESS_TOKEN);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddParameter("application/json", "{\r\n    \"providerId\": \"" + strProviderID + "\",\r\n    \"trackingNumber\": \"" + strTrackingNumber + "\"\r\n}", ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                _header.LanguageCode = "En";
+                _header.RequestStatus = "Error";
+                _header.ReturnCode = "ASxxxx";
+                _header.StatusCode = "200";
+                _header.ReturnMessage = "Successful!";
+            }
+            else
+            {
+                _header.LanguageCode = "En";
+                _header.RequestStatus = "Error";
+                _header.ReturnCode = "ASxxxx";
+                _header.StatusCode = response.StatusCode.ToString();
+                _header.ReturnMessage = response.ErrorMessage;
+
+            }
+
+            return _header;
+        }
     }
 }

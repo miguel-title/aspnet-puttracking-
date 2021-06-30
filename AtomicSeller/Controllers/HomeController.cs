@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
-using MiraklDouglasAPI.Models;
 using AtomicCommonAPI.Models;
 using AtomicSeller.Models;
 
@@ -35,16 +34,18 @@ namespace AtomicSeller.Controllers
         [HttpGet]
         public ActionResult JoomPutTrackingNumber()
         {
+            JoomStore _Store = new JoomStore();
+            _Store.APIURL = "https://api-merchant.joom.com";
+            _Store.User= "sheny.ecommerce@gmail.com";
+            _Store.Password = "Nahman148";
+            _Store.ClientID = "b5849d8dcbe34a28";
+            _Store.Clientsecret = "faf02e4c1a19b54da4e0da8f17a85b9e";
 
-            MiraklDouglas.Store _Store = new MiraklDouglas.Store();
-
-            _Store.StoreAPIURL = API_BASE_URL_TEST;
-            _Store.WoocommerceKey = API_KEY_TEST;
-
-            List<MiraklDouglas.ProductVM> _ProductVMs = InitProductVMs();
-
+            string strProviderID = "1494503711005136775-195-61-709-1614392117";
+            string strTrackingNumber = "RS921315778DE";
+            string orderID = "63VM5MQV";
             // This test site with fake data
-            ResponseHeader _ResponseHeader = new MiraklDouglas().BulkUpdateStock(_Store, _ProductVMs);
+            ResponseHeader _ResponseHeader = new Joom().PutTrackingNumber(_Store, strProviderID, strTrackingNumber, orderID);
 
             return RedirectToAction("Index", "Home");
         }
@@ -52,14 +53,14 @@ namespace AtomicSeller.Controllers
         [HttpGet]
         public ActionResult OxatisPutTrackingNumber()
         {
-            MiraklDouglas.Store _Store = new MiraklDouglas.Store();
+            OxatisStore _Store = new OxatisStore();
 
-            _Store.StoreAPIURL = API_BASE_URL_PROD_Nocibe;
-            _Store.WoocommerceKey = API_KEY_URL_PROD_Nocibe;
+            _Store.APIURL = "";
+            _Store.AppID = "aa8026275ea4c18fb15bd1085d30b6d0";
+            _Store.Token = "AF134034BD96236703D84BBB65";
 
-            List<MiraklDouglas.ProductVM> _ProductVMs = InitProductVMs();
             // Beware !!! This is production site with real data
-            //ResponseHeader _ResponseHeader = new MiraklDouglas().BulkUpdateStock(_Store, _ProductVMs);
+            ResponseHeader _ResponseHeader = new Oxatis().PutTrackingNumber(_Store);
 
             return RedirectToAction("Index", "Home");
         }
@@ -67,15 +68,22 @@ namespace AtomicSeller.Controllers
         [HttpGet]
         public ActionResult MiraklPutTrackingNumber()
         {
-            MiraklDouglas.Store _Store = new MiraklDouglas.Store();
+            MiraklStore _Store = new MiraklStore();
+            //_Store.APIKey = "aded029a-7b57-48a5-b492-4353596ae60d";
+            _Store.APIKey = "1f038315-ec48-4fc5-82f3-11e87e6ad827";
+            _Store.APIURL = "https://douglas2-dev.mirakl.net";
 
-            _Store.StoreAPIURL = API_BASE_URL_PROD_FeelUnique;
-            _Store.WoocommerceKey = API_KEY_URL_PROD_FeelUnique;
+            bool deliveryStatus = false;
+            string trackingNumber = "1Z2356F1ZJ98L9733M5";
+            string carrier_name = "UPS";
+            string carrier_code = "UPS";
+            string trackingurl = "https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={trackingId}";
 
-            List<MiraklDouglas.ProductVM> _ProductVMs = InitProductVMs();
+            string orderID = "DGLDE000002751601-A";
+            string offersku = "S2426";
 
-            // Beware !!! This is production site with real data
-            ResponseHeader _ResponseHeader = new MiraklDouglas().BulkUpdateStock(_Store, _ProductVMs);
+            //// Beware !!! This is production site with real data
+            ResponseHeader _ResponseHeader = new MiraklDouglas().PutTrackingNumber(_Store, orderID, offersku, deliveryStatus, trackingNumber, carrier_name, carrier_code, trackingurl);
 
             return RedirectToAction("Index", "Home");
         }

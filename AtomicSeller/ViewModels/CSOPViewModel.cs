@@ -15,7 +15,6 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using AtomicSeller.Helpers;
-using MiraklDouglasAPI.Models;
 using System.Globalization;
 using System.Threading;
 

@@ -195,6 +195,9 @@
       <HintPath>..\packages\Quartz.3.0.7\lib\net452\Quartz.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RestSharp, Version=106.11.7.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.11.7\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
@@ -369,6 +372,7 @@
     <Compile Include="Helpers\eCommerceConnectors\JoomAPIModels.cs" />
     <Compile Include="Helpers\eCommerceConnectors\MiraklMetro.cs" />
     <Compile Include="Helpers\eCommerceConnectors\MiraklMetroAPIModels.cs" />
+    <Compile Include="Helpers\eCommerceConnectors\MiraklDouglas.cs" />
     <Compile Include="Helpers\eCommerceConnectors\Oxatis.cs" />
     <Compile Include="Helpers\eCommerceConnectors\OxatisAPIOrdersModels.cs" />
     <Compile Include="Helpers\MaterialDesignIcons.cs" />
@@ -415,7 +419,6 @@
     <Compile Include="Helpers\ValidationAttributes\MinDecimalValueAttribute.cs" />
     <Compile Include="Helpers\ValidationAttributes\ModuloDecimalValueAttribute.cs" />
     <Compile Include="Helpers\ValidationAttributes\MinIntegerValueAttribute.cs" />
-    <Compile Include="Models\MiraklAPIModelsOLD.cs" />
     <Compile Include="Models\CommonModels.cs" />
     <Compile Include="Models\DataAccessManagers\DataAccess_LoginData.cs" />
     <Compile Include="Models\DataAccessManagers\DataAccess_Reference.cs" />
@@ -440,11 +443,10 @@
     </Compile>
     <Compile Include="Helpers\Navigation\MenuItem.cs" />
     <Compile Include="Helpers\Navigation\NavigationHelper.cs" />
-    <Compile Include="Models\MiraklDouglasAPIModelsOLD.cs" />
-    <Compile Include="Models\MïraklDouglasAPIModelNew.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\ProductInfoAPIModels.cs" />
     <Compile Include="Models\ProductsAPImodels.cs" />
+    <Compile Include="Models\PutTrackingModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
